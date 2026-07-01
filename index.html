@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Path-JEPA · Path Signature Based Predictive Learning for Skeleton Action Recognition</title>
+<meta name="description" content="Path-JEPA: a self-supervised JEPA framework that predicts path-signature targets for skeleton-based action recognition. ECCV 2026." />
+
+<!-- Social preview (fill in with your hosted URLs) -->
+<meta property="og:title" content="Path-JEPA (ECCV 2026)" />
+<meta property="og:description" content="Path Signature Based Predictive Learning for Skeleton Action Recognition." />
+<meta property="og:type" content="website" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#F6F8FA;
+    --panel:#0D1117;
+    --panel-2:#141A22;
+    --ink:#12161C;
+    --muted:#5A6472;
+    --line:#E3E7EC;
+    --joint:#E23E6B;   /* J-PSF */
+    --pair:#3B6FF0;    /* P-PSF */
+    --chain:#10A697;   /* C-PSF */
+    --maxw:960px;
+    --radius:14px;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Newsreader",Georgia,serif;
+    font-size:19px;
+    line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  a{color:inherit}
+  ::selection{background:rgba(226,62,107,.18)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+  .eyebrow{
+    font-family:"JetBrains Mono",monospace;
+    font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--muted);font-weight:500;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background:radial-gradient(120% 120% at 70% 10%, #1A222E 0%, var(--panel) 55%);
+    color:#EAF0F7;
+    padding:40px 0 8px;
+    border-bottom:1px solid #0A0D12;
+    overflow:hidden;
+  }
+  .hero .wrap{padding-top:14px;padding-bottom:34px}
+  .venue{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.14em;
+    text-transform:uppercase;color:#9FB0C4;
+    border:1px solid #2A3644;border-radius:999px;padding:5px 12px;margin-bottom:22px;
+  }
+  .venue b{color:#fff;font-weight:600;letter-spacing:.1em}
+  .venue .dot{width:7px;height:7px;border-radius:50%;
+    background:linear-gradient(90deg,var(--joint),var(--pair),var(--chain))}
+
+  h1.title{
+    font-family:"Space Grotesk",sans-serif;
+    font-weight:600;
+    font-size:clamp(30px,5.4vw,52px);
+    line-height:1.04;
+    letter-spacing:-.02em;
+    margin:0 0 6px;
+    color:#fff;
+  }
+  h1.title .brand{
+    background:linear-gradient(90deg,var(--joint) 0%,var(--pair) 52%,var(--chain) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{
+    font-family:"Newsreader",serif;font-style:italic;
+    font-size:clamp(17px,2.4vw,21px);color:#B9C6D6;max-width:640px;margin:0 0 26px;
+  }
+
+  .authors{font-family:"Space Grotesk",sans-serif;font-size:17px;margin:0 0 4px;color:#EAF0F7}
+  .authors a{text-decoration:none;border-bottom:1px solid transparent;transition:border-color .15s}
+  .authors a:hover{border-color:#5B6b7d}
+  .authors sup{color:#8CA0B6;font-size:12px}
+  .affil{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:#8CA0B6;letter-spacing:.02em;margin:0 0 26px}
+
+  .actions{display:flex;flex-wrap:wrap;gap:10px}
+  .btn{
+    display:inline-flex;align-items:center;gap:9px;
+    font-family:"Space Grotesk",sans-serif;font-size:14.5px;font-weight:500;
+    text-decoration:none;padding:10px 16px;border-radius:10px;
+    background:#1D2732;color:#EAF0F7;border:1px solid #2C3846;
+    transition:transform .12s ease, background .15s, border-color .15s;
+  }
+  .btn:hover{background:#26333F;transform:translateY(-1px);border-color:#3A4A5B}
+  .btn.primary{background:#fff;color:#0D1117;border-color:#fff}
+  .btn.primary:hover{background:#E9EEF4}
+  .btn svg{width:16px;height:16px}
+  .btn:focus-visible,a:focus-visible,button:focus-visible{outline:2px solid var(--pair);outline-offset:2px}
+
+  /* hero figure */
+  .stage{
+    margin-top:30px;
+    background:linear-gradient(180deg,#0B0F15 0%,#0E141C 100%);
+    border:1px solid #1C2530;border-radius:var(--radius);
+    position:relative;overflow:hidden;
+  }
+  .stage svg{display:block;width:100%;height:auto}
+  .legend{
+    position:absolute;left:16px;bottom:14px;display:flex;gap:16px;flex-wrap:wrap;
+    font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.06em;color:#93A4B8;
+  }
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .legend i{width:16px;height:3px;border-radius:2px;display:inline-block}
+  .cap{
+    position:absolute;right:16px;top:14px;max-width:220px;text-align:right;
+    font-family:"JetBrains Mono",monospace;font-size:10.5px;line-height:1.5;color:#6B7B8E;letter-spacing:.04em;
+  }
+
+  /* ---------- SECTIONS ---------- */
+  section{padding:66px 0}
+  section + section{border-top:1px solid var(--line)}
+  h2{
+    font-family:"Space Grotesk",sans-serif;font-weight:600;letter-spacing:-.01em;
+    font-size:clamp(24px,3.4vw,32px);margin:10px 0 20px;
+  }
+  h3{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:20px;margin:0 0 8px}
+  p{margin:0 0 18px}
+  .lead{max-width:720px}
+  .muted{color:var(--muted)}
+
+  /* contributions */
+  .contribs{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:8px}
+  .card{
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px 22px 20px;position:relative;
+  }
+  .card .tag{
+    font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    display:inline-block;padding:3px 9px;border-radius:6px;margin-bottom:12px;font-weight:500;
+  }
+  .t-joint{color:var(--joint);background:rgba(226,62,107,.09)}
+  .t-pair{color:var(--pair);background:rgba(59,111,240,.09)}
+  .t-chain{color:var(--chain);background:rgba(16,166,151,.10)}
+  .t-all{color:#374151;background:#EEF1F5}
+  .card p{font-size:16.5px;line-height:1.55;margin:0;color:#2B333D}
+
+  /* result highlights */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:6px 0 34px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+  .stat .num{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:40px;line-height:1;letter-spacing:-.02em}
+  .stat .num small{font-size:20px;font-weight:600;color:var(--muted)}
+  .stat .lab{font-family:"JetBrains Mono",monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:10px}
+  .stat.j .num{color:var(--joint)} .stat.p .num{color:var(--pair)} .stat.c .num{color:var(--chain)}
+
+  /* tables */
+  .tablecard{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:26px}
+  .tablecard .thead{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .tablecard .thead h3{margin:0}
+  .tablecard .thead .note{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--muted);letter-spacing:.04em}
+  .scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  thead th{
+    font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:12.5px;text-align:right;
+    color:var(--muted);padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  thead th:first-child{text-align:left}
+  tbody td{font-family:"JetBrains Mono",monospace;font-size:14px;text-align:right;padding:11px 14px;border-bottom:1px solid #EEF1F5;color:#333B45;font-variant-numeric:tabular-nums}
+  tbody td:first-child{font-family:"Space Grotesk",sans-serif;text-align:left;color:var(--ink);font-size:14.5px}
+  tbody tr:last-child td{border-bottom:none}
+  tr.ours td{background:linear-gradient(90deg,rgba(226,62,107,.05),rgba(16,166,151,.05));color:var(--ink)}
+  tr.ours td:first-child{font-weight:600}
+  td.best{font-weight:600;color:var(--ink)}
+  .grouprow td{background:#FAFBFC;font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#93A0AE;text-align:left;padding:8px 14px}
+
+  /* bibtex */
+  .bib{background:var(--panel);border-radius:var(--radius);overflow:hidden;border:1px solid #1C2530}
+  .bib .bar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #1C2530}
+  .bib .bar span{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8CA0B6}
+  .bib pre{margin:0;padding:20px 18px;overflow-x:auto;color:#CBD6E3;font-family:"JetBrains Mono",monospace;font-size:13.5px;line-height:1.65}
+  .copy{font-family:"Space Grotesk",sans-serif;font-size:13px;background:#1D2732;color:#EAF0F7;border:1px solid #2C3846;border-radius:8px;padding:6px 12px;cursor:pointer;transition:background .15s}
+  .copy:hover{background:#26333F}
+
+  footer{padding:40px 0 60px;color:var(--muted);font-size:14px;font-family:"Space Grotesk",sans-serif}
+  footer a{color:var(--muted)}
+  hr.rule{border:none;border-top:1px solid var(--line);margin:0}
+
+  @media (max-width:640px){
+    body{font-size:18px}
+    .contribs,.stats{grid-template-columns:1fr}
+    .cap{display:none}
+    .legend{position:static;padding:12px 16px}
+  }
+
+  @media (prefers-reduced-motion:no-preference){
+    .trail{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:draw 2.2s ease forwards}
+    .trail.d1{animation-delay:.15s} .trail.d2{animation-delay:.5s} .trail.d3{animation-delay:.85s}
+    .ghost{opacity:0;animation:fade .8s ease forwards}
+    .ghost.g1{animation-delay:.1s} .ghost.g2{animation-delay:.3s}
+    .jointdot{opacity:0;animation:pop .5s ease forwards 1s}
+    .area{opacity:0;animation:fade 1s ease forwards 1.4s}
+  }
+  @keyframes draw{to{stroke-dashoffset:0}}
+  @keyframes fade{to{opacity:var(--to,1)}}
+  @keyframes pop{to{opacity:1}}
+</style>
+</head>
+<body>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="wrap">
+    <span class="venue"><span class="dot"></span> <b>ECCV 2026</b> · Proceedings</span>
+
+    <h1 class="title"><span class="brand">Path-JEPA</span></h1>
+    <p class="subtitle">Path Signature Based Predictive Learning for Skeleton Action Recognition</p>
+
+    <p class="authors">
+      <a href="#">Ashutosh Singh</a><sup>1</sup> &nbsp;·&nbsp;
+      <a href="#">Ashish Singh</a><sup>2</sup>
+    </p>
+    <p class="affil"><sup>1</sup> Northeastern University &nbsp;&nbsp; <sup>2</sup> University of Massachusetts Amherst</p>
+
+    <nav class="actions">
+      <!-- Replace href="#" with your real links -->
+      <a class="btn primary" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v5h5M7 3h7l5 5v11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/></svg>
+        Paper
+      </a>
+      <a class="btn" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v14H4z"/><path d="M4 9h16"/></svg>
+        arXiv
+      </a>
+      <a class="btn" href="#">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.6 2 12.2c0 4.5 2.9 8.3 6.8 9.6.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.4-3.4-1.4-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.7.4-1.1.6-1.4-2.2-.3-4.5-1.1-4.5-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.3 9.3 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.3 4.7-4.5 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10 10 0 0 0 22 12.2C22 6.6 17.5 2 12 2z"/></svg>
+        Code
+      </a>
+      <a class="btn" href="#bibtex">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4h9l3 3v13H6z"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>
+        BibTeX
+      </a>
+    </nav>
+
+    <!-- Signature element: onion-skinned skeleton with animated path-signature trails -->
+    <div class="stage">
+      <svg viewBox="0 0 720 360" role="img" aria-label="Animated skeleton with joint, pair, and chain motion-signature trails">
+        <defs>
+          <radialGradient id="glow" cx="50%" cy="45%" r="70%">
+            <stop offset="0%" stop-color="#1A2530" stop-opacity="0"/>
+            <stop offset="100%" stop-color="#080B0F" stop-opacity=".6"/>
+          </radialGradient>
+          <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="2.4" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+            <path d="M36 0H0V36" fill="none" stroke="#182029" stroke-width="1"/>
+          </pattern>
+        </defs>
+
+        <rect width="720" height="360" fill="url(#grid)"/>
+        <rect width="720" height="360" fill="url(#glow)"/>
+
+        <!-- signed-area (Lévy area) hint between shoulder and reaching wrist -->
+        <polygon class="area" style="--to:.14" points="300,120 470,240 500,150 470,90"
+                 fill="var(--pair)" />
+
+        <!-- skeletons + trails injected by script -->
+        <g id="scene"></g>
+      </svg>
+
+      <p class="cap">Joint trajectories lifted to continuous paths, then summarised by multi-scale log-signatures over joint / pair / chain families.</p>
+      <div class="legend">
+        <span><i style="background:var(--joint)"></i> J-PSF · joint</span>
+        <span><i style="background:var(--pair)"></i> P-PSF · pair</span>
+        <span><i style="background:var(--chain)"></i> C-PSF · chain</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= ABSTRACT ================= -->
+<section id="abstract">
+  <div class="wrap">
+    <span class="eyebrow">Abstract</span>
+    <h2>Predicting motion geometry, not coordinates</h2>
+    <div class="lead">
+      <p>Self-supervised learning has become a strong paradigm for skeleton-based action recognition, but the choice of prediction target remains a central limitation. Masked modeling methods that reconstruct raw joint coordinates emphasize low-level detail and are sensitive to noise, while non-reconstruction variants predict learned latent features that improve semantics but provide little explicit motion structure.</p>
+      <p>We propose <b>Path-JEPA</b>, a self-supervised predictive framework that uses <b>path signatures</b> as the target representation for skeleton sequences. Instead of predicting coordinates or abstract embeddings, Path-JEPA predicts latent representations of continuous-time, multi-scale geometric descriptors computed over joint, edge, and chain paths. These targets encode displacement, signed area, and higher-order interactions — a geometry-grounded representation of human motion that is naturally robust to temporal resampling and frame-rate variation.</p>
+      <p>To make such targets effective within a JEPA framework, we introduce <b>signature-augmented masking</b>, which propagates joint-space masks to all dependent signature tokens and forces the model to infer missing motion geometry from broader anatomical and temporal context. Across NTU RGB+D 60, NTU RGB+D 120, and PKU-MMD, Path-JEPA learns stronger representations than prior masked-prediction methods, reaching state-of-the-art on multiple downstream tasks while remaining markedly more robust under irregular sampling.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CONTRIBUTIONS ================= -->
+<section id="method">
+  <div class="wrap">
+    <span class="eyebrow">Contributions</span>
+    <h2>Four moving parts</h2>
+    <div class="contribs">
+      <div class="card">
+        <span class="tag t-all">Framework</span>
+        <h3>Path-JEPA</h3>
+        <p>A JEPA-based SSL framework for skeleton action recognition that predicts embeddings derived from path-signature features rather than raw coordinates.</p>
+      </div>
+      <div class="card">
+        <span class="tag t-chain">Tokenization</span>
+        <h3>Multi-scale relational signatures</h3>
+        <p>Signature tokens over joint, pair, and kinematic-chain paths, capturing relational structure and temporal abstraction over continuously interpolated motion.</p>
+      </div>
+      <div class="card">
+        <span class="tag t-joint">Masking</span>
+        <h3>Signature-augmented masking</h3>
+        <p>Joint masking is propagated to every dependent signature token, enforcing leak-free structured prediction over motion geometry across the token hierarchy.</p>
+      </div>
+      <div class="card">
+        <span class="tag t-pair">Results</span>
+        <h3>Robust, transferable features</h3>
+        <p>Improved linear evaluation, fine-tuning, semi-supervised, and cross-dataset performance — with strong robustness to temporal resampling and irregular sampling.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RESULTS ================= -->
+<section id="results">
+  <div class="wrap">
+    <span class="eyebrow">Results</span>
+    <h2>State of the art on standard benchmarks</h2>
+
+    <div class="stats">
+      <div class="stat j"><div class="num">87.6<small>%</small></div><div class="lab">Linear · NTU60 X-Sub</div></div>
+      <div class="stat p"><div class="num">98.2<small>%</small></div><div class="lab">Fine-tune · NTU60 X-View</div></div>
+      <div class="stat c"><div class="num">1.0<small>%</small></div><div class="lab">Accuracy spread · 15–60 fps</div></div>
+    </div>
+
+    <!-- Linear evaluation -->
+    <div class="tablecard">
+      <div class="thead"><h3>Linear evaluation accuracy (%)</h3><span class="note">frozen encoder · selected baselines</span></div>
+      <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Method</th><th>NTU60 X-Sub</th><th>NTU60 X-View</th><th>NTU120 X-Sub</th><th>NTU120 X-Set</th><th>PKU I</th><th>PKU II</th></tr>
+        </thead>
+        <tbody>
+          <tr class="grouprow"><td colspan="7">Contrastive / reconstruction</td></tr>
+          <tr><td>HiCo</td><td>81.1</td><td>88.6</td><td>72.8</td><td>74.1</td><td>89.3</td><td>49.4</td></tr>
+          <tr><td>MAMP</td><td>84.9</td><td>89.1</td><td>78.6</td><td>79.1</td><td>92.2</td><td>53.8</td></tr>
+          <tr class="grouprow"><td colspan="7">Feature prediction</td></tr>
+          <tr><td>GFP</td><td>85.9</td><td>92.0</td><td>79.1</td><td>80.3</td><td>—</td><td>56.2</td></tr>
+          <tr><td>S-JEPA</td><td>85.3</td><td>89.8</td><td>79.6</td><td>79.9</td><td>92.2</td><td>53.5</td></tr>
+          <tr class="ours"><td>Path-JEPA (ours)</td><td class="best">87.6</td><td class="best">92.9</td><td class="best">81.5</td><td class="best">81.8</td><td class="best">93.4</td><td class="best">56.7</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+
+    <!-- Frame-rate robustness -->
+    <div class="tablecard">
+      <div class="thead"><h3>Robustness to frame-rate variation</h3><span class="note">NTU60 X-Sub · accuracy (%)</span></div>
+      <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Method</th><th>15 fps</th><th>20 fps</th><th>30 fps</th><th>45 fps</th><th>60 fps</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>SkeletonMAE</td><td>69.9</td><td>73.2</td><td>74.8</td><td>71.1</td><td>70.3</td></tr>
+          <tr><td>MAMP</td><td>81.8</td><td>83.5</td><td>84.9</td><td>82.7</td><td>81.2</td></tr>
+          <tr><td>S-JEPA</td><td>82.4</td><td>82.9</td><td>85.3</td><td>84.7</td><td>84.5</td></tr>
+          <tr class="ours"><td>Path-JEPA (ours)</td><td class="best">87.1</td><td class="best">87.5</td><td class="best">87.7</td><td class="best">87.8</td><td class="best">88.1</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+    <p class="muted" style="font-size:15px">Path signatures satisfy reparameterization invariance — <span style="font-family:'JetBrains Mono',monospace;font-size:13px">S(x∘φ)=S(x)</span> for monotone φ — so accuracy stays within a 1.0% band across 15–60 fps, while coordinate- and latent-target baselines degrade under resampling.</p>
+  </div>
+</section>
+
+<!-- ================= BIBTEX ================= -->
+<section id="bibtex">
+  <div class="wrap">
+    <span class="eyebrow">Citation</span>
+    <h2>BibTeX</h2>
+    <div class="bib">
+      <div class="bar"><span>bibtex</span><button class="copy" id="copyBtn">Copy</button></div>
+<pre id="bibtex-src">@inproceedings{singh2026pathjepa,
+  title     = {Path-JEPA: Path Signature Based Predictive Learning
+               for Skeleton Action Recognition},
+  author    = {Singh, Ashutosh and Singh, Ashish},
+  booktitle = {European Conference on Computer Vision (ECCV)},
+  year      = {2026}
+}</pre>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+<footer>
+  <div class="wrap">
+    Path-JEPA · ECCV 2026. Page content adapted from the paper.<br>
+    Built as a static site for GitHub Pages — no dependencies, single file.
+  </div>
+</footer>
+
+<script>
+  // ---- Copy BibTeX ----
+  const btn = document.getElementById('copyBtn');
+  btn && btn.addEventListener('click', async () => {
+    try{
+      await navigator.clipboard.writeText(document.getElementById('bibtex-src').innerText);
+      btn.textContent = 'Copied';
+      setTimeout(()=>btn.textContent='Copy', 1400);
+    }catch(e){ btn.textContent='Copy failed'; }
+  });
+
+  // ---- Skeleton scene (onion-skin poses + signature trails) ----
+  const NS = 'http://www.w3.org/2000/svg';
+  const scene = document.getElementById('scene');
+
+  // base pose, then a reaching sweep of the right arm + a step of the left leg
+  const bones = [
+    ['head','neck'],['neck','shoA'],['neck','shoB'],
+    ['shoA','elbA'],['elbA','wriA'],['shoB','elbB'],['elbB','wriB'],
+    ['neck','hip'],['hip','hipA'],['hip','hipB'],
+    ['hipA','kneA'],['kneA','ankA'],['hipB','kneB'],['kneB','ankB']
+  ];
+  const base = {
+    head:[300,70], neck:[300,110],
+    shoA:[262,122], shoB:[338,122],
+    elbA:[245,168], elbB:[356,168],
+    wriA:[238,214], wriB:[372,214],
+    hip:[300,210], hipA:[276,214], hipB:[324,214],
+    kneA:[270,282], kneB:[330,282],
+    ankA:[266,352], ankB:[334,352]
+  };
+  // three poses: shift reaching arm up, swing left ankle
+  function pose(shift){
+    const p = JSON.parse(JSON.stringify(base));
+    p.elbB = [356+shift*10, 168-shift*16];
+    p.wriB = [372+shift*32, 214-shift*58];
+    p.ankA = [266-shift*30, 352-shift*4];
+    p.kneA = [270-shift*16, 282];
+    p.head = [300, 70-shift*2];
+    return p;
+  }
+  const poses = [pose(0), pose(1), pose(2)];
+
+  function drawSkeleton(p, opacity, cls){
+    const g = document.createElementNS(NS,'g');
+    if(cls){ g.setAttribute('class',cls); g.style.setProperty('--to', opacity); }
+    g.setAttribute('opacity', cls ? 0 : opacity);
+    bones.forEach(([a,b])=>{
+      const l = document.createElementNS(NS,'line');
+      l.setAttribute('x1',p[a][0]); l.setAttribute('y1',p[a][1]);
+      l.setAttribute('x2',p[b][0]); l.setAttribute('y2',p[b][1]);
+      l.setAttribute('stroke', opacity>=1 ? '#DCE6F1' : '#4A5B6E');
+      l.setAttribute('stroke-width', opacity>=1 ? 3 : 2);
+      l.setAttribute('stroke-linecap','round');
+      g.appendChild(l);
+    });
+    if(opacity>=1){
+      Object.values(p).forEach(([x,y])=>{
+        const c = document.createElementNS(NS,'circle');
+        c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r',4.2);
+        c.setAttribute('fill','#0D1117'); c.setAttribute('stroke','#EAF0F7'); c.setAttribute('stroke-width','2');
+        c.setAttribute('class','jointdot');
+        g.appendChild(c);
+      });
+    }
+    scene.appendChild(g);
+  }
+
+  // ghost poses (faint), then solid current pose
+  drawSkeleton(poses[0], .22, 'ghost g1');
+  drawSkeleton(poses[1], .40, 'ghost g2');
+  drawSkeleton(poses[2], 1);
+
+  // signature trails: a joint (wriB), a pair (wriA), a chain endpoint (ankA)
+  function trail(key, color, cls){
+    const pts = poses.map(p=>p[key]);
+    const d = `M ${pts[0][0]} ${pts[0][1]} Q ${pts[1][0]} ${pts[1][1]} ${pts[2][0]} ${pts[2][1]}`;
+    const path = document.createElementNS(NS,'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke', color);
+    path.setAttribute('stroke-width', 2.6);
+    path.setAttribute('stroke-linecap','round');
+    path.setAttribute('filter','url(#soft)');
+    path.setAttribute('class', 'trail ' + cls);
+    scene.appendChild(path);
+    const len = path.getTotalLength ? path.getTotalLength() : 400;
+    path.style.setProperty('--len', len);
+  }
+  trail('wriB', 'var(--joint)', 'd1'); // J
+  trail('wriA', 'var(--pair)',  'd2'); // P
+  trail('ankA', 'var(--chain)', 'd3'); // C
+</script>
+</body>
+</html>
