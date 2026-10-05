@@ -15,6 +15,8 @@ Self-supervised learning (SSL) has become a leading paradigm for skeleton-based 
 | Button | Points to |
 | --- | --- |
 | Paper | ECCV proceedings: `https://doi.org/10.1007/978-3-032-37258-1_7` (or a `paper.pdf` in the repo) |
+| Video | https://www.youtube.com/watch?v=RNr8g3KlL54 |
+| Poster | https://eccv.ecva.net/media/PosterPDFs/ECCV%202026/4270.png?t=1788326396.4086194 |
 | Code | **Coming soon** — label the button "Code (coming soon)" and leave it unlinked until the release; then point it to the GitHub repository |
 
 
