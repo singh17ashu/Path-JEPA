@@ -2,6 +2,8 @@
 
 Static, single-file project page for **Path-JEPA (ECCV 2026)**. No build step, no dependencies.
 
+> **Code coming soon.** The official implementation of Path-JEPA (training, evaluation, and pretrained checkpoints) is being prepared for release and will be published shortly. Watch or star this repository to be notified when it's available.
+
 ## Deploy to GitHub Pages
 
 **Option A — user/project site**
@@ -15,13 +17,13 @@ Name the repo `<username>.github.io` and push `index.html` to root. Live at `htt
 
 ## Before you publish — fill in the placeholders
 
-In `index.html`, replace `href="#"` on the four hero buttons with real URLs:
+In `index.html`, replace `href="#"` on the hero buttons with real URLs:
 
 | Button | Points to |
 | --- | --- |
 | Paper | PDF (e.g. `paper.pdf` in the repo, or the ECCV proceedings link) |
 | arXiv | your arXiv abstract page |
-| Code | GitHub repository |
+| Code | **Coming soon** — label the button "Code (coming soon)" and leave it unlinked until the release; then point it to the GitHub repository |
 | BibTeX | already anchors to the on-page citation block |
 
 Author links (`<a href="#">` in `.authors`) can point to homepages/Scholar.
